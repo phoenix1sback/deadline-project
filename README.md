@@ -14,3 +14,4 @@ Ongoing – basic structure completed.
 ## Project Structure
 ## Author
 Wahid Sheikh
+This project is being developed as part of my learning journey.
