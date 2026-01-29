@@ -1,110 +1,174 @@
 const express = require("express");
 const chrono = require("chrono-node");
 
+/* =====================================
+   INTENT TRAINING DATA
+   ===================================== */
+
+const INTENTS = {
+  HIGH_URGENCY: [
+    "late submissions will not be accepted",
+    "no extensions allowed",
+    "mandatory submission",
+    "attendance is compulsory",
+    "attendance is mandatory",
+    "must be submitted"
+  ],
+
+  MEDIUM_URGENCY: [
+    "important notice",
+    "please submit",
+    "kind reminder",
+    "required submission"
+  ],
+
+  LOW_URGENCY: [
+    "for your information",
+    "optional",
+    "if possible",
+    "no hurry"
+  ]
+};
+
+/* =====================================
+   APP SETUP
+   ===================================== */
+
 const app = express();
 app.use(express.json());
 app.use(express.static("../frontend"));
 
-/* ---------------- HELPER FUNCTIONS ---------------- */
+/* =====================================
+   BASIC UTILITIES
+   ===================================== */
 
-// Clean text but KEEP links
 function cleanText(text) {
   return text
+    .toLowerCase()
     .replace(/[^\w\s:/.,-]/g, "")
-    .replace(/\b(hi|hello|dear|thanks|regards|good morning)\b/gi, "")
     .trim();
 }
 
-// Extract links
 function extractLinks(text) {
-  const links = text.match(/https?:\/\/\S+/g);
-  return links || [];
+  return text.match(/https?:\/\/\S+/g) || [];
 }
 
-// Check if deadline-related
 function isDeadlineMessage(text) {
   const keywords = [
-    "deadline", "due", "submission", "submit",
-    "exam", "test", "assignment", "project",
-    "last date", "fees", "payment", "mandatory", "fill"
+    "deadline", "submit", "submission",
+    "exam", "test", "assignment",
+    "project", "mandatory", "due"
   ];
-  return keywords.some(k => text.toLowerCase().includes(k));
+  return keywords.some(word => text.includes(word));
 }
 
-// Extract topic using context
-function extractTopic(text) {
-  const keywords = [
-    "assignment", "project", "exam",
-    "test", "submission", "fee",
-    "presentation", "review", "form"
-  ];
+/* =====================================
+   TOPIC DETECTION
+   ===================================== */
 
-  const words = text.split(" ");
-  for (let i = 0; i < words.length; i++) {
-    for (let k of keywords) {
-      if (words[i].toLowerCase().includes(k)) {
-        return words.slice(Math.max(0, i - 2), i + 3).join(" ");
-      }
-    }
-  }
+function extractTopic(text) {
+  if (/\bassignment\b/.test(text)) return "Assignment Submission";
+  if (/\bproject\b/.test(text)) return "Project Deadline";
+  if (/\bexam\b/.test(text)) return "Exam Schedule";
+  if (/\btest\b/.test(text)) return "Test Schedule";
+  if (/\bfee\b/.test(text)) return "Fee Payment";
+  if (/\bform\b/.test(text)) return "Form Submission";
   return "General Deadline";
 }
 
-// Detect seriousness
-function detectSeriousness(text) {
-  let score = 0;
-  const high = ["mandatory", "not accepted", "strict", "must", "last date"];
-  const medium = ["important", "reminder", "required", "due"];
+/* =====================================
+   NLP / AI LOGIC
+   ===================================== */
 
-  high.forEach(w => { if (text.toLowerCase().includes(w)) score += 3; });
-  medium.forEach(w => { if (text.toLowerCase().includes(w)) score += 2; });
-
-  if (score >= 3) return "HIGH";
-  if (score >= 2) return "MEDIUM";
-  return "LOW";
+function normalize(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .split(" ");
 }
 
-// Confidence score
+function similarityScore(sentence, examples) {
+  const sentenceWords = normalize(sentence);
+  let maxScore = 0;
+
+  for (let example of examples) {
+    const exampleWords = normalize(example);
+    const common = sentenceWords.filter(w => exampleWords.includes(w));
+    const score = common.length / exampleWords.length;
+    maxScore = Math.max(maxScore, score);
+  }
+
+  return maxScore;
+}
+
+function splitSentences(text) {
+  return text
+    .split(/[.!?]/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function detectSeriousness(rawText) {
+  const sentences = splitSentences(rawText);
+  let priority = "LOW";
+
+  for (let sentence of sentences) {
+    const highScore = similarityScore(sentence, INTENTS.HIGH_URGENCY);
+    const mediumScore = similarityScore(sentence, INTENTS.MEDIUM_URGENCY);
+
+    if (highScore >= 0.3) return "HIGH";
+    if (mediumScore >= 0.3) priority = "MEDIUM";
+  }
+
+  return priority;
+}
+
+/* =====================================
+   CONFIDENCE SCORE
+   ===================================== */
+
 function calculateConfidence(text, date, topic) {
-  let confidence = 0;
-  if (date) confidence += 40;
-  if (topic !== "General Deadline") confidence += 30;
-  if (isDeadlineMessage(text)) confidence += 30;
-  return confidence;
+  let score = 0;
+  if (date) score += 40;
+  if (topic !== "General Deadline") score += 30;
+  if (isDeadlineMessage(text)) score += 30;
+  return score;
 }
 
-/* ---------------- API ROUTE ---------------- */
+/* =====================================
+   API ENDPOINT
+   ===================================== */
 
 app.post("/api/extract", (req, res) => {
-  const rawText = req.body.text;
+  const rawText = req.body.text || "";
+  const cleanedText = cleanText(rawText);
 
-  const links = extractLinks(rawText);
-  const text = cleanText(rawText);
-
-  // If not a deadline message
-  if (!isDeadlineMessage(text)) {
+  if (!isDeadlineMessage(cleanedText)) {
     return res.json({
-      message: "No deadline-related content found.",
+      message: "No deadline-related content found",
       confidence: 10
     });
   }
 
-  const date = chrono.parseDate(text);
-  const topic = extractTopic(text);
-  const seriousness = detectSeriousness(text);
-  const confidence = calculateConfidence(text, date, topic);
+  const date = chrono.parseDate(cleanedText);
+  const topic = extractTopic(cleanedText);
+  const seriousness = detectSeriousness(rawText);
+  const confidence = calculateConfidence(cleanedText, date, topic);
+  const links = extractLinks(rawText);
 
   res.json({
     topic,
     date,
     seriousness,
     confidence,
-    importantLinks: links.length > 0 ? links : null
+    importantLinks: links.length ? links : null
   });
 });
 
-/* ---------------- START SERVER ---------------- */
+/* =====================================
+   START SERVER
+   ===================================== */
 
-app.listen(3000, () =>
-  console.log("Server running on port 3000")
-);
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
