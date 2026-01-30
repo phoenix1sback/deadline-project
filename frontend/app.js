@@ -1,3 +1,33 @@
+function setReminder(date) {
+  if (!("Notification" in window)) {
+    alert("Notifications not supported on this device");
+    return;
+  }
+
+  Notification.requestPermission().then(permission => {
+    if (permission !== "granted") {
+      alert("Please allow notifications to set reminder");
+      return;
+    }
+
+    const reminderTime = new Date(date).getTime();
+    const now = Date.now();
+    const delay = reminderTime - now;
+
+    if (delay <= 0) {
+      alert("Deadline time already passed");
+      return;
+    }
+
+    setTimeout(() => {
+      new Notification("⏰ Deadline Reminder", {
+        body: "Your deadline is now!",
+        vibrate: [200, 100, 200]
+      });
+    }, delay);
+  });
+}
+
 async function extract() {
   let text = document.getElementById("msg").value;
 
@@ -41,3 +71,27 @@ async function extract() {
     </div>
   `;
 }
+  // ---- SET REMINDER ON PHONE ----
+  if (data.date) {
+    setReminder(data.date);
+    alert("Reminder set for 10 minutes before deadline");
+  }
+  function testNotification() {
+  if (!("Notification" in window)) {
+    alert("Notifications not supported");
+    return;
+  }
+
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      new Notification("🔔 Test Notification", {
+        body: "If you see this, notifications work!",
+        vibrate: [200, 100, 200]
+      });
+    } else {
+      alert("Permission not granted");
+    }
+  });
+}
+
+
