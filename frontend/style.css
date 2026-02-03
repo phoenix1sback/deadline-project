@@ -1,84 +1,201 @@
-body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f4f6f8;
+/* ========== GLOBAL RESET ========== */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-.container {
-  max-width: 700px;
-  margin: 40px auto;
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+/* ========== PAGE BACKGROUND ========== */
+body {
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #333;
 }
 
+/* ========== MAIN LAYOUT ========== */
+.container {
+  max-width: 520px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* ========== HEADER ========== */
 h1 {
   text-align: center;
-  color: #333;
+  margin-bottom: 10px;
 }
 
 .subtitle {
   text-align: center;
-  color: #666;
+  font-size: 14px;
+  color: #555;
   margin-bottom: 20px;
 }
 
+/* ========== TEXTAREA ========== */
 textarea {
   width: 100%;
-  height: 140px;
-  padding: 12px;
-  border-radius: 8px;
+  height: 160px;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
   border: 1px solid #ccc;
-  font-size: 15px;
   resize: none;
+  outline: none;
 }
 
+textarea:focus {
+  border-color: #667eea;
+}
+
+/* ========== BUTTON ========== */
 button {
   width: 100%;
-  margin-top: 16px;
-  padding: 12px;
-  background: #4f46e5;
+  margin-top: 15px;
+  padding: 14px;
+  font-size: 16px;
+  background: #667eea;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
 button:hover {
-  background: #4338ca;
+  background: #5563c1;
 }
 
+/* ========== RESULT SECTION ========== */
+#result {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Result card */
 .card {
-  margin-top: 24px;
+  background: #f7f8ff;
   padding: 16px;
   border-radius: 10px;
-  background: #f9fafb;
-  border-left: 6px solid #4f46e5;
-}
-
-.label {
-  font-weight: bold;
-  color: #444;
+  border-left: 6px solid #667eea;
+  text-align: left;
 }
 
 .value {
   margin-bottom: 10px;
+  font-size: 15px;
 }
 
+.label {
+  font-weight: bold;
+}
+
+/* ========== PRIORITY COLORS ========== */
 .high {
-  color: #dc2626;
+  color: #d9534f;
   font-weight: bold;
 }
 
 .medium {
-  color: #d97706;
+  color: #f0ad4e;
   font-weight: bold;
 }
 
 .low {
-  color: #16a34a;
+  color: #5cb85c;
   font-weight: bold;
+}
+
+/* ========== TIMER ========== */
+#timer {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #d9534f;
+}
+
+/* ========== MOBILE FRIENDLY ========== */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  textarea {
+    height: 140px;
+  }
+}
+
+/* Result card */
+.card {
+  background: #f8f9ff;
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-top: 18px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  border-left: 6px solid #6c7cff;
+}
+
+/* Topic */
+.card .center {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+/* Date + Time block */
+.datetime {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;   /* 👈 aligns content to right side */
+  margin-left: 28px;         /* 👈 pushes block to the right */
+  gap: 6px;
+  font-size: 15px;
+  color: #333;
+}
+
+/* Date */
+.datetime .date {
+  font-weight: 600;
+}
+
+/* Time */
+.datetime .time {
+  color: #555;
+}
+
+/* Priority row */
+.card .value {
+  margin-top: 10px;
+  margin-left: 28px;        /* 👈 aligns with date/time */
+  font-size: 15px;
+}
+
+/* Priority colors */
+.high {
+  color: #e53935;
+  font-weight: bold;
+}
+
+.medium {
+  color: #fb8c00;
+  font-weight: bold;
+}
+
+.low {
+  color: #43a047;
+  font-weight: bold;
+}
+
+/* Countdown timer */
+#timer {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e53935;
 }

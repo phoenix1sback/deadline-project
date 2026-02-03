@@ -2,12 +2,14 @@
 <html>
 <head>
   <title>Deadline Extractor</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
 <div class="container">
   <h1>📌 Deadline Extractor</h1>
+
   <p class="subtitle">
     Share or paste a WhatsApp message to extract deadlines automatically
   </p>
@@ -17,12 +19,14 @@
   <button onclick="extract()">Extract Deadline</button>
 
   <div id="result"></div>
-  <div id="timer" style="margin-top:15px;font-size:18px;font-weight:bold;"></div>
+  <div id="timer"></div>
+
+  <button onclick="requestNotificationPermission()">
+  Enable Notifications
+</button>
 
 </div>
 
 <script src="app.js"></script>
-<button onclick="testNotification()">Test Notification</button>
-
 </body>
-</html>
+
