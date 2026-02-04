@@ -64,7 +64,7 @@ async function extract() {
   try {
     const text = document.getElementById("msg").value;
 
-    const res = await fetch("/api/extract", {
+    const res = await fetch("https://deadline-project.onrender.com/api/extract", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })

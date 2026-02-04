@@ -12,6 +12,7 @@
   "dependencies": {
     "chrono-node": "^2.9.0",
     "compromise": "^14.14.5",
+    "cors": "^2.8.6",
     "express": "^5.2.1"
   }
 }
