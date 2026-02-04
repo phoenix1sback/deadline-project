@@ -40,14 +40,21 @@ if (diff <= 0) {
 
 /* ================= MAIN FUNCTION ================= */
 
-function enableNotifications() {
+function requestNotificationPermission() {
   if (!("Notification" in window)) {
     alert("Notifications not supported");
     return;
   }
 
   Notification.requestPermission().then(permission => {
-    alert("Permission status: " + permission);
+    if (permission === "granted") {
+      new Notification("🔔 Notifications Enabled", {
+        body: "You will receive deadline alerts",
+        vibrate: [200, 100, 200]
+      });
+    } else {
+      alert("Permission not granted");
+    }
   });
 }
 
